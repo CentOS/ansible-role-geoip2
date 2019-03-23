@@ -1,1 +1,5 @@
 # Defaults variables for role geoip2
+#
+# No variables really as this role is just there to be included in various other ones
+# It only ensure that pkgs are installed and GeoLite DB from maxmind installed at init time 
+# and updated through cron job

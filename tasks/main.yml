@@ -1,1 +1,29 @@
 # Defaults tasks for role geoip2
+- name: Installing python GeoIP2 pkg
+  yum:
+    name: "{{ geoip_pkgs }}"
+    state: latest
+  vars:
+    geoip_pkgs:
+      - GeoIP
+      - python2-geoip2
+
+- name: Adding script to update GeoLite2-{City,Country} DBs 
+  template:
+    src: geoip_update.j2
+    dest: /usr/libexec/centos/geoip_update
+    mode: 0750
+
+- name: Downloading GeoIP DB on init
+  command: /usr/libexec/centos/geoip_update
+  args:
+    creates: /usr/share/GeoIP/GeoLite2-City.mmdb   
+ 
+- name: Scheduling GeoLite DB update
+  cron:
+    name: GeoLite DB update
+    minute: 5
+    hour: 9
+    day: 2
+    user: root
+    job: /usr/libexec/centos/geoip_update
