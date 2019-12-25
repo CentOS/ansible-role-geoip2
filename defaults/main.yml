@@ -1,5 +1,6 @@
 # Defaults variables for role geoip2
 #
-# No variables really as this role is just there to be included in various other ones
 # It only ensure that pkgs are installed and GeoLite DB from maxmind installed at init time 
 # and updated through cron job
+# Needed variable (from 2019-12-31 , see https://blog.maxmind.com/2019/12/18/significant-changes-to-accessing-and-using-geolite2-databases/ is just the license key from maxmind accound
+geoip2_maxmind_license_key: ''

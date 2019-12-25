@@ -8,8 +8,12 @@ geo_reload="True"
 
 function geodb_download() {
   db_file="$1"
-  curl --silent --location -O https://geolite.maxmind.com/download/geoip/database/${db_file}.tar.gz
-  geoip_md5=$(curl --silent --location https://geolite.maxmind.com/download/geoip/database/${db_file}.tar.gz.md5)
+  curl "https://download.maxmind.com/app/geoip_download?edition_id=${db_file}&license_key={{ geoip_maxmind_license_key }}&suffix=tar.gz" --fail --silent --location > ${db_file}.tar.gz
+  if [ "$?" -ne "0" ]  ;then
+    logger "Maxmind ${db_file} download failed"
+    exit 1
+  fi
+  geoip_md5=$(curl --silent --location "https://download.maxmind.com/app/geoip_download?edition_id=${db_file}&license_key={{ geoip_maxmind_license_key }}&suffix=tar.gz.md5")
   geodb_md5=$(md5sum ${db_file}.tar.gz |awk '{print $1}')
   if [ "$geodb_md5" == "$geoip_md5" ] ;then 
     logger ${db_file} download ok with md5sum $geoip_md5
@@ -28,20 +32,21 @@ geodb_download GeoLite2-Country
 
 if [ "$geo_reload" == "True" ] ;then
  # testing if mirrorlist is running
-  systemctl is-active --quiet centos-ml-instance@1
-  if [ "$?" -eq "0" ] ; then
-    for i in {1..5} ; do 
+  for i in {1..20} ; do
+    systemctl is-active --quiet centos-ml-instance@${i}
+    if [ "$?" -eq "0" ] ; then
       systemctl restart centos-ml-instance@${i}
-    done  
-  fi
+      sleep 1
+    fi
+ done  
 
  # testing if isoredirect is running
-  systemctl is-active --quiet centos-isoredirect-instance@1
-  if [ "$?" -eq "0" ] ; then
-    for i in {1..5} ; do 
+  for i in {1..20} ; do 
+    systemctl is-active --quiet centos-isoredirect-instance@${i}
+    if [ "$?" -eq "0" ] ; then
       systemctl restart centos-isoredirect-instance@${i}
-    done  
-  fi
+    fi
+  done  
 
  # testing if pdns is running
   systemctl is-active --quiet pdns
