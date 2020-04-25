@@ -22,8 +22,8 @@
 - name: Scheduling GeoLite DB update
   cron:
     name: GeoLite DB update
-    minute: 5
-    hour: 9
-    day: 2
+    minute: '5'
+    hour: '9'
+    day: '2'
     user: root
     job: /usr/libexec/centos/geoip_update
