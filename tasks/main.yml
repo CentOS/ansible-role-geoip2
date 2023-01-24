@@ -1,23 +1,30 @@
 # Defaults tasks for role geoip2
+- name: Importing specific distro variables
+  ansible.builtin.include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml"
+    - "{{ ansible_distribution }}.yml"
+  tags:
+    - vars
+    - always
+
+
 - name: Installing python GeoIP2 pkg
   yum:
     name: "{{ geoip_pkgs }}"
     state: latest
-  vars:
-    geoip_pkgs:
-      - GeoIP
-      - python2-geoip2
 
 - name: Adding script to update GeoLite2-{City,Country} DBs 
   template:
     src: geoip_update.j2
     dest: /usr/libexec/centos/geoip_update
     mode: 0750
+  register: geoip_download_script  
 
 - name: Downloading GeoIP DB on init
-  command: /usr/libexec/centos/geoip_update
-  args:
-    creates: /usr/share/GeoIP/GeoLite2-City.mmdb   
+  command: 
+    cmd: /usr/libexec/centos/geoip_update
+  when: geoip_download_script is changed
  
 - name: Scheduling GeoLite DB update
   cron:

@@ -1,0 +1,5 @@
+# Variables specific to el7
+geoip_pkgs:
+  - GeoIP
+  - python2-geoip2
+
